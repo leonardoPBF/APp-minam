@@ -35,6 +35,7 @@ def load_and_process_documents():
 
 def clear_query():
     st.session_state["user_query_input"] = ""
+    st.rerun()
 
 def main():
     st.set_page_config(page_title="Asistente Normativo MINAM", layout="wide")
@@ -46,25 +47,29 @@ def main():
         .stApp { background: #F4F8F7; color: #1A3D34; }
 
         .navbar {
-            background-color: #1C7C54;
+            background-color: #D8EEE4;
             width: 100%;
-            padding: 14px;
-            color: white;
-            font-size: 20px;
+            padding: 16px;
+            color: #0E3B2E;
+            font-size: 22px;
             text-align: center;
-            border-bottom: 4px solid #145E3A;
+            border-bottom: 3px solid #9DC8B9;
             font-weight: 600;
+            border-radius: 6px;
+            margin-bottom: 10px;
         }
 
         .banner img {
             width: 100%;
-            height: 180px;
+            height: 160px;
             object-fit: cover;
+            border-radius: 6px;
+            margin-bottom: 15px;
         }
 
         .response-box {
             background: #FFFFFF;
-            border-left: 4px solid #1C7C54;
+            border-left: 4px solid #4CA476;
             padding: 16px;
             border-radius: 8px;
             font-size: 16px;
@@ -81,67 +86,54 @@ def main():
             background: #FFFFFF;
             padding: 12px;
             border-radius: 6px;
-            border-left: 4px solid #1C7C54;
+            border-left: 4px solid #4CA476;
             font-size: 14px;
         }
 
         .suggestion-box {
-            background: #E8F3EE;
+            background: #EDF7F2;
             padding: 10px;
             border-radius: 6px;
             margin-bottom: 12px;
             border-left: 4px solid #60A68C;
         }
 
-        button.custom-btn {
-            background-color: #1C7C54;
-            color: white;
-            border-radius: 6px;
-            padding: 10px 20px;
-            font-weight: 600;
-            border: none;
-            width: 100%;
-        }
-        button.custom-btn:hover {
-            background-color: #145E3A;
-        }
-        button.clear-btn {
-            background-color: #A82C2C;
-        }
-        button.clear-btn:hover {
-            background-color: #8E2424;
+        textarea, input {
+            background-color: #ffffff !important;
+            border-radius: 8px !important;
+            border: 1px solid #C8E2D1 !important;
         }
 
-        form button { display: none !important; }
+        /* Ocultar botones internos del form */
+        form button {
+            display: none !important;
+        }
         </style>
 
         <div class='navbar'>Asistente Normativo MINAM Perú</div>
         <div class='banner'>
-            <img src="https://portal.mineco.gob.pe/wp-content/uploads/2023/10/minam.webp">
+            <img src="https://www.conservamospornaturaleza.org/img/2015/10/minam-logo.jpg">
         </div>
     """, unsafe_allow_html=True)
 
     # ===================== UI =====================
-    with st.sidebar:
-        st.empty()
-
     st.title("🌱 Consulta Normativa Ambiental")
-    st.write("Asistente legal contextualizado a la normativa ambiental oficial del MINAM.")
+    st.write("Asistente contextualizado a la normativa ambiental oficial del MINAM Perú.")
 
     st.markdown("""
         <div class='suggestion-box'>
-        <b>Ejemplos:</b>
+        <b>Ejemplos de preguntas:</b>
         <ul>
             <li>¿Qué norma regula la gestión de residuos sólidos?</li>
-            <li>Requisitos para evaluación de impacto ambiental.</li>
-            <li>Procedimiento de autorización ambiental.</li>
+            <li>Requisitos para una evaluación de impacto ambiental (EIA).</li>
+            <li>¿Cómo tramitar una autorización ambiental?</li>
         </ul>
         </div>
     """, unsafe_allow_html=True)
 
     vstore = load_and_process_documents()
     if not GEMINI_API_KEY:
-        st.error("❌ Falta GEMINI_API_KEY en el .env")
+        st.error("❌ Falta GEMINI_API_KEY en el archivo .env")
         st.stop()
 
     llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0.0, google_api_key=GEMINI_API_KEY)
@@ -149,7 +141,7 @@ def main():
 
     prompt = ChatPromptTemplate.from_template("""
         Responde como asesor jurídico del MINAM Perú.
-        Usa solo fundamentos normativos presentes en el contexto.
+        Usa únicamente fundamentos normativos presentes en el contexto.
 
         CONTEXTO:
         {context}
@@ -164,18 +156,24 @@ def main():
         | prompt | llm | StrOutputParser()
     )
 
+    # ===================== FORM =====================
     with st.form("consulta"):
         consulta = st.text_input("✏️ Escribe tu consulta", key="user_query_input")
         submit = st.form_submit_button("hidden_submit")
-        st.form_submit_button("hidden_clear", on_click=clear_query)
 
-    # Botones visuales
     col1, col2 = st.columns(2)
-    if col1.button("✅ Consultar", key="btn_consultar", help="Enviar consulta", use_container_width=True):
-        submit = True
-    if col2.button("🧹 Limpiar", key="btn_limpiar", help="Borrar consulta", use_container_width=True):
-        clear_query()
 
+    # Botón consultar
+    with col1:
+        if st.button("✅ Consultar", use_container_width=True):
+            submit = True
+
+    # Botón limpiar
+    with col2:
+        if st.button("🧹 Limpiar", use_container_width=True):
+            clear_query()
+
+    # ===================== RESPUESTA =====================
     if submit and consulta:
         with st.spinner("Procesando normativa..."):
             respuesta = chain.invoke(consulta)
