@@ -174,7 +174,7 @@ def main():
     # ===================== FORM =====================
     with st.form("consulta"):
         consulta = st.text_input("✏️ Escribe tu consulta", key="user_query_input")
-        submit = st.form_submit_button("hidden_submit")
+        submit = st.form_submit_button("Consulta prueba")
 
     col1, col2 = st.columns(2)
 
