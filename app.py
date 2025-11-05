@@ -51,93 +51,79 @@ def clear_query():
 def main():
     st.set_page_config(page_title="Asistente Normativo MINAM", layout="wide")
 
-    # ===== CSS personalizado =====
+    # ===== CSS Claro & Navbar =====
     st.markdown("""
         <style>
         body {
-            background-color: #0B1215;
+            background-color: #F6F9F9;
         }
         .stApp {
-            background: #0B1215;
-            color: #F4F6F6;
+            background: #F6F9F9;
+            color: #1D3B32;
         }
 
-        /* Header Institucional */
-        .header {
-            background-color: #02733E;
-            padding: 18px;
-            text-align: center;
+        /* Navbar */
+        .navbar {
+            background-color: #1C7C54;
+            width: 100%;
+            padding: 14px;
             color: white;
-            border-bottom: 6px solid #D22630;
-            font-size: 24px;
+            font-size: 21px;
+            text-align: center;
+            border-bottom: 5px solid #145E3A;
             font-weight: bold;
         }
 
-        /* Sidebar */
-        [data-testid="stSidebar"] {
-            background-color: #0E2421;
-            padding: 0 !important;
-        }
-        .sidebar-box {
-            padding: 12px;
-            color: #F4F6F6;
-        }
-        .sidebar-box h3 {
-            color: #E6F8E0;
-        }
-
-        .image-banner img {
+        /* Banner */
+        .banner img {
             width: 100%;
             height: 180px;
             object-fit: cover;
-            border-bottom: 4px solid #D22630;
+            border-bottom: 3px solid #145E3A;
         }
 
         /* Caja de respuesta */
         .response-box {
-            background: #113A2D;
-            border-left: 5px solid #D22630;
-            padding: 15px;
+            background: #FFFFFF;
+            border-left: 4px solid #1C7C54;
+            padding: 14px;
             border-radius: 8px;
             font-size: 16px;
+            line-height: 1.5;
         }
 
-        hr {
-            border: 1px solid #D22630;
+        /* Sugerencias */
+        .suggestion-box {
+            background: #E8F3EE;
+            border-left: 4px solid #60A68C;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+        .suggestion-box ul {
+            font-size: 14px;
+            color: #2B4C42;
         }
         </style>
+
+        <div class='navbar'>Asistente Normativo MINAM Perú</div>
+        <div class='banner'>
+            <img src="https://portal.mineco.gob.pe/wp-content/uploads/2023/10/minam.webp">
+        </div>
     """, unsafe_allow_html=True)
 
-    # ===== HEADER =====
-    st.markdown('<div class="header">Asistente RAG Normativo | Ministerio del Ambiente – Perú</div>', unsafe_allow_html=True)
+    # Ocultar sidebar
+    with st.sidebar: pass
 
-    # ===== SIDEBAR =====
-    with st.sidebar:
-        st.markdown("""
-        <div class="image-banner">
-            <img src="https://www.gob.pe/assets/logo_peru.png">
-        </div>
-        """, unsafe_allow_html=True)
-
-        st.markdown("""
-        <div class="sidebar-box">
-            <h3>MINAM – Perú</h3>
-            <p>Consultas sobre normativa ambiental, resoluciones oficiales y gestión pública.</p>
-            <hr>
-            <p>Motor: Gemini 2.5 Flash + RAG</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-    # ===== CONTENIDO =====
-    st.title("🌿 Asesor Normativo Ambiental")
-    st.write("Base documental: Resoluciones y normas del MINAM.")
+    st.title("🌱 Consulta Normativa Ambiental del MINAM")
+    st.write("Sistema de asistencia legal con búsqueda en normativa oficial.")
 
     vstore = load_and_process_documents()
     if not vstore:
         st.stop()
 
     if not GEMINI_API_KEY:
-        st.error("Configurar GEMINI_API_KEY en .env")
+        st.error("Falta GEMINI_API_KEY en archivo .env")
         st.stop()
 
     llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0.0, google_api_key=GEMINI_API_KEY)
@@ -145,7 +131,7 @@ def main():
 
     prompt = ChatPromptTemplate.from_template("""
         Responde como asesor jurídico ambiental del MINAM Perú.
-        Usa exclusivamente el contexto entregado y sé formal.
+        Responde únicamente con fundamentos normativos contenidas en el contexto.
 
         CONTEXTO:
         {context}
@@ -162,20 +148,35 @@ def main():
         | prompt | llm | StrOutputParser()
     )
 
+    # Formulario
     with st.form("consulta"):
-        consulta = st.text_input("Formula tu consulta normativa", key="user_query_input")
+        consulta = st.text_input("📌 Escribe tu consulta", key="user_query_input")
+
+        # Sugerencias
+        st.markdown("""
+        <div class='suggestion-box'>
+        <b>Ejemplos:</b>
+        <ul>
+        <li>¿Qué norma regula la gestión de residuos sólidos?</li>
+        <li>¿Quién supervisa la fiscalización ambiental en el Perú?</li>
+        <li>¿Cuáles son los lineamientos del SEIA?</li>
+        <li>¿Qué sanciones existen por contaminar un recurso hídrico?</li>
+        </ul>
+        </div>
+        """, unsafe_allow_html=True)
+
         submit = st.form_submit_button("Consultar")
         st.form_submit_button("Limpiar", on_click=clear_query)
 
         if submit and consulta:
-            with st.spinner("Buscando en normativa..."):
+            with st.spinner("Procesando consulta normativa..."):
                 respuesta = chain.invoke(consulta)
                 fuentes = retriever.invoke(consulta)
 
             st.subheader("✅ Respuesta")
             st.markdown(f"<div class='response-box'>{respuesta}</div>", unsafe_allow_html=True)
 
-            st.subheader("📚 Documentos utilizados")
+            st.subheader("📄 Documentos consultados")
             for d in fuentes:
                 st.expander(d.metadata.get("titulo", "Documento")).write(d.page_content)
 
