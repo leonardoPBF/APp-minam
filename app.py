@@ -154,16 +154,99 @@ def main():
 
         # Sugerencias
         st.markdown("""
-        <div class='suggestion-box'>
-        <b>Ejemplos:</b>
-        <ul>
-        <li>¿Qué norma regula la gestión de residuos sólidos?</li>
-        <li>¿Quién supervisa la fiscalización ambiental en el Perú?</li>
-        <li>¿Cuáles son los lineamientos del SEIA?</li>
-        <li>¿Qué sanciones existen por contaminar un recurso hídrico?</li>
-        </ul>
+        <style>
+
+        body {
+            background-color: #F4F8F7;
+        }
+        .stApp {
+            background: #F4F8F7;
+            color: #1A3D34;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: #1C7C54;
+            width: 100%;
+            padding: 14px;
+            color: white;
+            font-size: 21px;
+            text-align: center;
+            border-bottom: 5px solid #145E3A;
+            font-weight: bold;
+        }
+
+        /* Banner */
+        .banner img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-bottom: 3px solid #145E3A;
+        }
+
+        /* Caja de respuesta */
+        .response-box {
+            background: #FFFFFF;
+            border-left: 4px solid #1C7C54;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        /* Sugerencias */
+        .suggestion-box {
+            background: #E6F3EC;
+            border-left: 4px solid #60A68C;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+
+        /* Botones */
+        .stButton>button {
+            background-color: #1C7C54 !important;
+            color: white !important;
+            border-radius: 6px !important;
+            padding: 8px 16px !important;
+            font-weight: 600 !important;
+            border: none !important;
+        }
+        .stButton>button:hover {
+            background-color: #145E3A !important;
+        }
+
+        /* Botón limpiar */
+        .stButton:nth-child(2)>button {
+            background-color: #A82C2C !important;
+        }
+        .stButton:nth-child(2)>button:hover {
+            background-color: #8E2424 !important;
+        }
+
+        /* Grid para documentos */
+        .docs-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+            margin-top: 14px;
+        }
+        .doc-box {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 4px solid #1C7C54;
+            font-size: 14px;
+        }
+
+        </style>
+
+        <div class='navbar'>Asistente Normativo MINAM Perú</div>
+        <div class='banner'>
+            <img src="https://portal.mineco.gob.pe/wp-content/uploads/2023/10/minam.webp">
         </div>
         """, unsafe_allow_html=True)
+
 
         submit = st.form_submit_button("Consultar")
         st.form_submit_button("Limpiar", on_click=clear_query)
@@ -177,8 +260,19 @@ def main():
             st.markdown(f"<div class='response-box'>{respuesta}</div>", unsafe_allow_html=True)
 
             st.subheader("📄 Documentos consultados")
+            st.markdown("### 📄 Documentos consultados")
+
+            st.markdown("<div class='docs-grid'>", unsafe_allow_html=True)
             for d in fuentes:
-                st.expander(d.metadata.get("titulo", "Documento")).write(d.page_content)
+                titulo = d.metadata.get("titulo", "Documento")
+                st.markdown(f"""
+                    <div class='doc-box'>
+                    <b>{titulo}</b><br>
+                    <small>{d.page_content[:220]}...</small>
+                    </div>
+                """, unsafe_allow_html=True)
+            st.markdown("</div>", unsafe_allow_html=True)
+
 
 if __name__ == "__main__":
     main()
