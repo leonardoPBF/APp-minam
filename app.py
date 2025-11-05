@@ -120,6 +120,9 @@ def main():
             color: #6B8F88 !important; /* Color suave para placeholder */
         }
 
+        button{
+          background-color: #1A3D34 !important; /* Color de texto visible */  
+        }
 
         <div class='navbar'>Asistente Normativo MINAM Perú</div>
         <div class='banner'>
