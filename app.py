@@ -108,7 +108,18 @@ def main():
         form button {
             display: none !important;
         }
-        </style>
+        
+        textarea, input {
+            background-color: #ffffff !important;
+            border-radius: 8px !important;
+            border: 1px solid #C8E2D1 !important;
+            color: #1A3D34 !important; /* Color de texto visible */
+        }
+
+        textarea::placeholder, input::placeholder {
+            color: #6B8F88 !important; /* Color suave para placeholder */
+        }
+
 
         <div class='navbar'>Asistente Normativo MINAM Perú</div>
         <div class='banner'>
