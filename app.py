@@ -122,6 +122,7 @@ def main():
 
         button{
           background-color: #1A3D34 !important; /* Color de texto visible */  
+          color: #6B8F88 !important; 
         }
 
         <div class='navbar'>Asistente Normativo MINAM Perú</div>
